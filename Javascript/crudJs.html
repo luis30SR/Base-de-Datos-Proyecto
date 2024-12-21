@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Clientes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .form-container, .table-container {
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    .form-container input {
+      margin: 5px 0;
+      padding: 8px;
+      width: 100%;
+    }
+    .form-container button {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .form-container button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Gestión de Clientes</h1>
+
+<div class="form-container">
+  <h2>Registrar Cliente</h2>
+  <form id="clientForm">
+    <input type="text" id="nombre" placeholder="Nombre" required />
+    <input type="text" id="apellido" placeholder="Apellido" required />
+    <input type="text" id="tipoDocumento" placeholder="Tipo de Documento" required />
+    <input type="text" id="numeroDocumento" placeholder="Número de Documento" required />
+    <input type="date" id="fechaNacimiento" placeholder="Fecha de Nacimiento" required />
+    <input type="text" id="genero" placeholder="Género" required />
+    <input type="email" id="correoElectronico" placeholder="Correo Electrónico" required />
+    <input type="text" id="direccion" placeholder="Dirección" required />
+    <input type="text" id="telefono" placeholder="Teléfono" required />
+    <button type="submit">Registrar Cliente</button>
+  </form>
+</div>
+
+<div class="table-container">
+  <h2>Lista de Clientes</h2>
+  <table id="clientesTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>Tipo Documento</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+const apiUrl = 'http://localhost:3000/clientes';
+
+// Registrar cliente
+const clientForm = document.getElementById('clientForm');
+clientForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const cliente = {
+    nombre: document.getElementById('nombre').value,
+    apellido: document.getElementById('apellido').value,
+    tipoDocumento: document.getElementById('tipoDocumento').value,
+    numeroDocumento: document.getElementById('numeroDocumento').value,
+    fechaNacimiento: document.getElementById('fechaNacimiento').value,
+    genero: document.getElementById('genero').value,
+    correoElectronico: document.getElementById('correoElectronico').value,
+    direccion: document.getElementById('direccion').value,
+    telefono: document.getElementById('telefono').value
+  };
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(cliente)
+  });
+
+  if (response.ok) {
+    alert('Cliente registrado con éxito');
+    loadClientes();
+    clientForm.reset();
+  } else {
+    alert('Error al registrar el cliente');
+  }
+});
+
+// Cargar clientes
+async function loadClientes() {
+  const response = await fetch(apiUrl);
+  const clientes = await response.json();
+
+  const tbody = document.getElementById('clientesTable').querySelector('tbody');
+  tbody.innerHTML = '';
+
+  clientes.forEach(cliente => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${cliente.id}</td>
+      <td>${cliente.nombre}</td>
+      <td>${cliente.apellido}</td>
+      <td>${cliente.tipoDocumento}</td>
+      <td>
+        <button onclick="deleteCliente(${cliente.id})">Eliminar</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// Eliminar cliente
+async function deleteCliente(id) {
+  const response = await fetch(`${apiUrl}/${id}`, {
+    method: 'DELETE'
+  });
+
+  if (response.ok) {
+    alert('Cliente eliminado con éxito');
+    loadClientes();
+  } else {
+    alert('Error al eliminar el cliente');
+  }
+}
+
+// Inicializar
+loadClientes();
+</script>
+
+</body>
+</html>
